@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import pl.pilleow.quizapp.quiz.QuizRepository;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -13,10 +14,12 @@ import java.util.Optional;
 @Service
 public class QuestionService {
     private final QuestionRepository questionRepository;
+    private final QuizRepository quizRepository;
 
     @Autowired
-    public QuestionService(QuestionRepository questionRepository) {
+    public QuestionService(QuestionRepository questionRepository, QuizRepository quizRepository) {
         this.questionRepository = questionRepository;
+        this.quizRepository = quizRepository;
     }
 
     public Question getQuestion(Long id) {
@@ -29,7 +32,12 @@ public class QuestionService {
     public void createQuestion(Question question) {
         Optional<Question> optionalQuestion = questionRepository.findQuestionByPytanie(question.getPytanie());
         if (optionalQuestion.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "W podanym quizie (QuizID="+question.getQuiz_id()+") znajduje się pytanie o takiej samej treści.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "W podanym quizie (QuizID=" + question.getQuiz_id() + ") znajduje się pytanie o takiej samej treści.");
+        }
+
+        boolean quizExists = quizRepository.existsById(question.getQuiz_id());
+        if (!quizExists) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz o podanym QuizID nie istneieje. Utwórz quiz o ID="+question.getQuiz_id()+" lub popraw QuizID.");
         }
 
         String[] odpowiedzi = question.getOdpowiedzi();
@@ -41,7 +49,6 @@ public class QuestionService {
                 }
             }
         }
-
         questionRepository.save(question);
     }
 
