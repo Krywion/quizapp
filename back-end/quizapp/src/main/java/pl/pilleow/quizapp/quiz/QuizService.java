@@ -5,7 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import pl.pilleow.quizapp.profile.ProfileRepository;
 import pl.pilleow.quizapp.question.QuestionRepository;
+
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -13,11 +16,13 @@ import java.util.Optional;
 public class QuizService {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
+    private final ProfileRepository profileRepository;
 
     @Autowired
-    public QuizService(QuizRepository quizRepository, QuestionRepository questionRepository) {
+    public QuizService(QuizRepository quizRepository, QuestionRepository questionRepository, ProfileRepository profileRepository) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
+        this.profileRepository = profileRepository;
     }
 
     public Quiz getQuiz(Long id) {
@@ -31,6 +36,10 @@ public class QuizService {
         Optional<Quiz> optionalQuiz = quizRepository.findQuizByTytul(quiz.getTytul());
         if (optionalQuiz.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Istnieje quiz o takim samym tytule. ID="+optionalQuiz.get().getId());
+        }
+        boolean profileExists = profileRepository.existsById(quiz.getAuthor_id());
+        if (!profileExists) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profil o podanym AuthorID nie istneieje.");
         }
         quizRepository.save(quiz);
     }
@@ -69,5 +78,13 @@ public class QuizService {
         }
         questionRepository.deleteQuestionsByQuizId(id);
         quizRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteQuizzesByAuthorId(Long id) {
+        List<Quiz> quizzes = quizRepository.findQuizzesByAuthorId(id);
+        for (Quiz q : quizzes) {
+            deleteQuiz(q.getId());
+        }
     }
 }
