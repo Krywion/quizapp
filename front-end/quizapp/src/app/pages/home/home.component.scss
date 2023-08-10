@@ -1,11 +1,19 @@
 #container {
     background-image: url(./../../../assets/wallpaperflare.com_wallpaper.jpg);
     background-size: cover;
+    opacity: 0.95;
 }
 
 #home-content {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.8);
+    position: absolute;
+    top: 50%;
+    left: 50%;
     color: white;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 10px;
+    border-radius: 20px;
+    margin: auto;
+    width: 100vh;
+    height: 70vh;
+    transform: translate(-50%, -50%);
 }

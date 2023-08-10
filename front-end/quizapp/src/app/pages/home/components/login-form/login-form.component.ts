@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { UserService } from 'src/app/services/user.service';
+import { User } from 'src/app/model/user';
 
 @Component({
   selector: 'app-login-form',
@@ -7,8 +9,12 @@ import { Component } from '@angular/core';
 })
 export class LoginFormComponent {
 
+  user = new User();
 
-  login(): void {
-    console.log('login');
+  constructor(private userService: UserService) {
+  }
+
+  onSubmit() {
+    this.userService.login(this.user);
   }
 }
